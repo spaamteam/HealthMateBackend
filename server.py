@@ -85,7 +85,7 @@ def patient_info():
     patient_json['lastvisitdate'] = patient_info['lastvisitdate']
     patient_json['riskflag'] = patient_info['riskflag']
 
-    patient['diagnosis'] = symptom_diagnosis(patient_info['gender'], patient_json['age'], patient)
+    # patient['diagnosis'] = symptom_diagnosis(patient_info['gender'], patient_json['age'], patient)
 
     collection = create_db_conn('symptoms')
     patient_json['symptom'] = collection.find_one({'patient_username': patient})

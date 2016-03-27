@@ -1,6 +1,6 @@
 __author__ = 'saurabh'
 from pymongo import MongoClient
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, make_response, jsonify
 from datetime import datetime
 import json, os
 
@@ -20,16 +20,14 @@ def create_user():
     patient['phone'] = request.values.get('phone')
     patient['height'] = request.values.get('height')
     patient['weight'] = request.values.get('weight')
-    #printed
-    print(patient)
+
     collection = create_db_conn('person')
     collection.insert_one(patient)
     dbconn.close()
-    # return render_template("create_user.html")
 
 @app.route("/patient_login", methods = ['GET', 'POST'])
 def patient_login():
-    json = None
+    json = {}
     username = request.values.get('user')
     password = request.values.get('pass')
 
@@ -37,12 +35,9 @@ def patient_login():
     if collection.find_one({'role':'patient','username':username, 'password':password}):
         print('Login Successful!')
         json = collection.find_one({'role':'patient','username':username, 'password':password})
-    else:
-        # login failure flag
-        print('Login Invalid!')
-    json['symptoms'] = symptoms_data()
+        json['symptoms'] = symptoms_data()
     dbconn.close()
-    return json
+    return jsonify(json)
 
 def symptoms_data():
     if request.method == 'POST':
@@ -59,19 +54,19 @@ def doctor_login():
 
     collection = create_db_conn('person')
     if collection.find_one({'role':'doctor', 'username':username, 'password':password}):
-        patients = collection.find_one({'role':'patient', 'doctor':username})
+        patients = collection.find({'role':'patient', 'doctor':username})
         for patient in patients:
-            patient_json['name']= patient['lname']+' '+patient['lname']
-            patient_json['stage'] = patient['json']
-            patient_json['flag'] = patient['flag']
+            patient_json['name']= patient['name']
+            patient_json['flag'] = patient['riskflag']
+            patient_json['phone'] = patient['phone']
 
-            patient_json_list.append(json.dumps(patient_json))
+            patient_json_list.append(patient_json)
         dbconn.close()
-        return patient_json_list
+        print(patient_json_list)
+        return jsonify({'patient_list':patient_json_list})
     else:
-        # login failure flag
-        print('Login Invalid!')
         return None
+
 
 
 @app.route("/patient_info", methods = ['GET', 'POST'])
@@ -80,23 +75,27 @@ def patient_info():
     patient = request.values.get('patient')
     collection = create_db_conn('person')
     patient_info = collection.find_one({'role':'patient', 'username':patient})
-    patient_json['name'] = patient_info['lname']+' '+patient_info['lname']
-    patient_json['age'] = int(datetime.datetime.now().year()) - int(patient_info['DOB'].split("/")[2])
+    patient_json['name'] = patient_info['name']
+    patient_json['age'] = int(datetime.now().year) - int(patient_info['DOB'].split("-")[2])
     patient_json['weight'] = patient_info['weight']
     patient_json['height'] = patient_info['height']
-    patient_json['last_visit'] = patient_info['last_visit']
+    patient_json['lastvisitdate'] = patient_info['lastvisitdate']
 
     collection = create_db_conn('symptoms')
     patient_json['symptom'] = collection.find_one({'patient_username': patient})
-    return json.dumps(patient_json)
+    return jsonify(patient_json)
 
-'''
+
 @app.route("/prescription", methods = ['GET', 'POST'])
 def prescription_info():
     prescription_json = {}
-    prescription = request.values.get('patient')
     collection = create_db_conn('prescription')
-'''
+    prescription_json['patientusername'] = collection['patient']
+    prescription_json['illness'] = collection['illness']
+    prescription_json['medicine'] = collection['medicine']
+    prescription_json['dosage'] = collection['dosagefrequency']
+    prescription_json['lastdosedatetime'] = collection['lastdosedatetime']
+    return jsonify(prescription_json)
 
 @app.route('/test', methods = ['GET', 'POST'])
 def test():
@@ -113,4 +112,4 @@ def create_db_conn(coll_name):
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(debug=True, host='localhost', port=port)

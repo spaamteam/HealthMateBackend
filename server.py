@@ -58,6 +58,7 @@ def doctor_login():
     if collection.find_one({'role':'doctor', 'username':username, 'password':password}):
         patients = collection.find({'role':'patient', 'doctor':username})
         for patient in patients:
+            patient_json['user'] = patient['username']
             patient_json['name']= patient['name']
             patient_json['flag'] = patient['riskflag']
             patient_json['phone'] = patient['phone']

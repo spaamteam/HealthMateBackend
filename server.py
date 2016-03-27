@@ -112,4 +112,5 @@ def create_db_conn(coll_name):
     return db.get_collection(coll_name)
 
 if __name__ == "__main__":
-    app.run()
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)

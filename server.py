@@ -47,8 +47,8 @@ def symptoms_data():
 
 @app.route("/doctor_login", methods = ['GET', 'POST'])
 def login():
-    patient_json_list = None
-    patient_json = None
+    patient_json_list = []
+    patient_json = {}
     if request.method == 'POST':
         username = request.values.get('user')
         password = request.values.get('pass')
@@ -60,11 +60,20 @@ def login():
                 patient_json['name']= patient['lname']+' '+patient['lname']
                 patient_json['stage'] = patient['json']
                 patient_json['flag'] = patient['flag']
+
+                patient_json_list.append(patient_json)
+            dbconn.close()
+            return patient_json_list
         else:
             # login failure flag
             print('Login Invalid!')
-        dbconn.close()
-        return json
+            return None
+
+@app.route('/test', methods = ['GET', 'POST'])
+def test():
+    if request.method == 'GET':
+        print(str(request.args.get('item1'))+'\n'+'')
+
 
 def create_db_conn(coll_name):
     global dbconn

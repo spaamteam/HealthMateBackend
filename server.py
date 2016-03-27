@@ -1,8 +1,8 @@
 __author__ = 'saurabh'
 from pymongo import MongoClient
-from flask import Flask, request, render_template, make_response, jsonify
+from flask import Flask, request, jsonify
 from datetime import datetime
-import json, os
+import os, infermedica_api, json
 
 app = Flask(__name__)
 dbconn = None
@@ -83,7 +83,7 @@ def patient_info():
 
     collection = create_db_conn('symptoms')
     patient_json['symptom'] = collection.find_one({'patient_username': patient})
-    return jsonify(patient_json)
+    return(json.dumps(patient_json))
 
 
 @app.route("/prescription", methods = ['GET', 'POST'])
@@ -96,6 +96,33 @@ def prescription_info():
     prescription_json['dosage'] = collection['dosagefrequency']
     prescription_json['lastdosedatetime'] = collection['lastdosedatetime']
     return jsonify(prescription_json)
+
+def symptom_analysis():
+    api = infermedica_api.get_api()
+    request = infermedica_api.Diagnosis(sex='male', age=35, time='2015-02-09T08:30:00+05:00')
+
+    request.add_symptom('s_102', 'present', time='2015-02-09T08:00:00+05:00')
+    request.add_symptom('s_21', 'present', time='2015-02-09')
+    request.add_symptom('s_98', 'absent')
+
+    request.set_pursued_conditions(['c_76', 'c_9'])
+
+    # call diagnosis
+    request = api.diagnosis(request)
+
+    print(request)
+
+    # ask patient the questions returned by diagnosis and update request with patient answers
+    request.add_symptom('s_23', 'present')
+    request.add_symptom('s_25', 'present')
+    request.add_symptom('s_604', 'absent')
+    request.add_symptom('s_1193', 'unknown')
+
+    # call diagnosis again with updated request
+    request = api.diagnosis(request)
+
+    # repeat the process
+    print('\n\n', request)
 
 @app.route('/test', methods = ['GET', 'POST'])
 def test():

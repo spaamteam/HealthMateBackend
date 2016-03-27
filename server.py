@@ -77,7 +77,6 @@ def doctor_login():
 def patient_info():
     patient_json = {}
     patient = request.values.get('patient')
-    print 'Received ' + patient
     collection = create_db_conn('person')
     patient_info = collection.find_one({'role':'patient', 'username':patient})
     patient_json['name'] = patient_info['lname']+' '+patient_info['lname']

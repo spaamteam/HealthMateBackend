@@ -50,7 +50,7 @@ def patient_login():
 @app.route("/doctor_login", methods = ['GET', 'POST'])
 def doctor_login():
     patient_json_list = []
-    patient_json = {}
+
     username = request.values.get('user')
     password = request.values.get('pass')
 
@@ -58,6 +58,7 @@ def doctor_login():
     if collection.find_one({'role':'doctor', 'username':username, 'password':password}):
         patients = collection.find({'role':'patient', 'doctor':username})
         for patient in patients:
+            patient_json = {}
             patient_json['user'] = patient['username']
             patient_json['name']= patient['name']
             patient_json['flag'] = patient['riskflag']
@@ -114,4 +115,4 @@ def create_db_conn(coll_name):
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(debug=True, host='0.0.0.0', port=port)
+    app.run(debug=True, host='localhost', port=port)

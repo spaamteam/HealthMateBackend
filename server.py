@@ -27,25 +27,25 @@ def create_user():
 
 @app.route("/patient_login", methods = ['GET', 'POST'])
 def patient_login():
-    json = {}
+    patient_json = {}
+    symptoms_list = []
     username = request.values.get('user')
     password = request.values.get('pass')
 
     collection = create_db_conn('person')
     if collection.find_one({'role':'patient','username':username, 'password':password}):
         print('Login Successful!')
-        json = collection.find_one({'role':'patient','username':username, 'password':password})
-        json['symptoms'] = symptoms_data()
-        dbconn.close()
-        return jsonify(json)
-    else:
-        return False
+        patient_info = collection.find_one({'role':'patient','username':username, 'password':password},{'_id':False})
 
-def symptoms_data():
-    if request.method == 'POST':
         collection = create_db_conn('symptoms')
-        symptoms_list = collection.find_one()
-        return symptoms_list
+        for symptom in collection.find({'patientusername':username},{'_id':False}):
+            symptoms_list.append(symptom)
+        patient_info['symptoms'] = symptoms_list
+        dbconn.close()
+        print(patient_info)
+        return jsonify(patient_info)
+    else:
+        return None
 
 @app.route("/doctor_login", methods = ['GET', 'POST'])
 def doctor_login():
@@ -67,7 +67,7 @@ def doctor_login():
         print(patient_json_list)
         return jsonify({'patient_list':patient_json_list})
     else:
-        return False
+        return None
 
 @app.route("/patient_info", methods = ['GET', 'POST'])
 def patient_info():
@@ -113,4 +113,4 @@ def create_db_conn(coll_name):
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(debug=True, host='0.0.0.0', port=port)
+    app.run(debug=True, host='localhost', port=port)

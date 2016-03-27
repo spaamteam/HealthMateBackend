@@ -20,6 +20,7 @@ def create_user():
     patient['phone'] = request.values.get('phone')
     patient['height'] = request.values.get('height')
     patient['weight'] = request.values.get('weight')
+    #printed
     print(patient)
     collection = create_db_conn('patients')
     collection.insert_one(patient)

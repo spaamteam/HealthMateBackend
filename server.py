@@ -2,7 +2,7 @@ __author__ = 'saurabh'
 from pymongo import MongoClient
 from flask import Flask, request, jsonify
 from datetime import datetime
-import os, json
+import os, json, infermedica_api
 
 app = Flask(__name__)
 dbconn = None
@@ -93,7 +93,7 @@ def patient_info():
 def prescription_info():
     prescription_json = []
     collection = create_db_conn('prescription')
-    prescriptions = collection.find({'role':'patient', 'patient':request.values.get('user')},{'_id':False})
+    prescriptions = collection.find({'patientusername':request.values.get('user')},{'_id':False})
     for prescription in prescriptions:
         prescription_json.append(prescription)
     return jsonify({'prescriptions':prescription_json})

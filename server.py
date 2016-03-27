@@ -22,7 +22,7 @@ def create_user():
     patient['weight'] = request.values.get('weight')
     #printed
     print(patient)
-    collection = create_db_conn('patients')
+    collection = create_db_conn('person')
     collection.insert_one(patient)
     dbconn.close()
     # return render_template("create_user.html")
@@ -105,8 +105,8 @@ def test():
 
 def create_db_conn(coll_name):
     global dbconn
-    dbconn = MongoClient(host="mongodb://app:app@ds025459.mlab.com:25459")
-    db = dbconn.get_database('heroku_40vrwzpp')
+    dbconn = MongoClient(host="mongodb://app:app@ds025459.mlab.com:25459/thecompanion")
+    db = dbconn.get_database('thecompanion')
     if not db.get_collection(coll_name):
         db.create_collection(coll_name)
     return db.get_collection(coll_name)

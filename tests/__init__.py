@@ -10,9 +10,9 @@ class InitializationTests(unittest.TestCase):
         """
         self.assertEqual(2+2, 4)
 
+
     def test_patient_login(self):
         """
         Checks for object creation for class in Problem 1
         """
-        from server import *
-        
+        from pymongo import MongoClient

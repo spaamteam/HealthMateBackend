@@ -20,7 +20,7 @@ def create_user():
     patient['phone'] = request.values.get('phone')
     patient['height'] = request.values.get('height')
     patient['weight'] = request.values.get('weight')
-
+    print "Received " + patient['username'] + patient['name']
     collection = create_db_conn('patients')
     collection.insert_one(patient)
     dbconn.close()
@@ -72,10 +72,12 @@ def doctor_login():
         print('Login Invalid!')
         return None
 
+
 @app.route("/patient_info", methods = ['GET', 'POST'])
 def patient_info():
     patient_json = {}
     patient = request.values.get('patient')
+    print 'Received ' + patient
     collection = create_db_conn('person')
     patient_info = collection.find_one({'role':'patient', 'username':patient})
     patient_json['name'] = patient_info['lname']+' '+patient_info['lname']
@@ -88,6 +90,13 @@ def patient_info():
     patient_json['symptom'] = collection.find_one({'patient_username': patient})
     return json.dumps(patient_json)
 
+'''
+@app.route("/prescription", methods = ['GET', 'POST'])
+def prescription_info():
+    prescription_json = {}
+    prescription = request.values.get('patient')
+    collection = create_db_conn('prescription')
+'''
 
 @app.route('/test', methods = ['GET', 'POST'])
 def test():

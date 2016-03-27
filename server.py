@@ -24,6 +24,7 @@ def create_user():
     patient['height'] = request.values.get('height')
     patient['weight'] = request.values.get('weight')
     patient['doctor'] = request.values.get('doctor')
+    patient['riskflag'] = 'green'
 
     collection = create_db_conn('person')
     collection.insert_one(patient)
@@ -138,4 +139,4 @@ def create_db_conn(coll_name):
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(debug=True, host='0.0.0.0', port=port)
+    app.run(debug=True, host='localhost', port=port)

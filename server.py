@@ -71,8 +71,7 @@ def login():
 
 @app.route('/test', methods = ['GET', 'POST'])
 def test():
-    if request.method == 'GET':
-        print(str(request.args.get('item1'))+'\n'+'')
+    print(request.args.get('item1')+' '+request.args.get('item2'))
 
 
 def create_db_conn(coll_name):

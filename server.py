@@ -1,8 +1,11 @@
-__author__ = 'saurabh'
+from __future__ import print_function
 from pymongo import MongoClient
 from flask import Flask, request, jsonify
 from datetime import datetime
-import os, json, infermedica_api, config
+import os, config
+
+config.setup_examples()
+import infermedica_api
 
 app = Flask(__name__)
 dbconn = None
@@ -20,6 +23,7 @@ def create_user():
     patient['phone'] = request.values.get('phone')
     patient['height'] = request.values.get('height')
     patient['weight'] = request.values.get('weight')
+    patient['doctor'] = request.values.get('doctor')
 
     collection = create_db_conn('person')
     collection.insert_one(patient)
@@ -85,7 +89,7 @@ def patient_info():
     patient_json['lastvisitdate'] = patient_info['lastvisitdate']
     patient_json['riskflag'] = patient_info['riskflag']
 
-    # patient['diagnosis'] = symptom_diagnosis(patient_info['gender'], patient_json['age'], patient)
+    # patient_json['diagnosis'] = symptom_diagnosis(patient_info['gender'], patient_json['age'], patient)
 
     collection = create_db_conn('symptoms')
     patient_json['symptom'] = collection.find_one({'patient_username': patient})
@@ -112,15 +116,14 @@ def test():
     print(request.args.get('item1')+' '+request.args.get('item2'))
 
 def symptom_diagnosis(gender, age, patientname):
-    config.setup_examples()
     api = infermedica_api.get_api()
+    print(gender, age)
     request = infermedica_api.Diagnosis(sex=gender, age=age)
 
     collection = create_db_conn('symptom')
     symptoms = collection.find({'patientusername':patientname})
     for symptom in symptoms:
-        request.add_symptom(symptoms['symptomid'], 'present')
-
+        request.add_symptom(symptom['symptomid'], 'present')
     # call diagnosis again with updated request
     request = api.diagnosis(request)
     return request

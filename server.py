@@ -2,7 +2,7 @@ __author__ = 'saurabh'
 from pymongo import MongoClient
 from flask import Flask, request, jsonify
 from datetime import datetime
-import os, json, infermedica_api
+import os, json, infermedica_api, config
 
 app = Flask(__name__)
 dbconn = None
@@ -83,9 +83,9 @@ def patient_info():
     patient_json['weight'] = patient_info['weight']
     patient_json['height'] = patient_info['height']
     patient_json['lastvisitdate'] = patient_info['lastvisitdate']
-    patient_json['riskflag'] = patient_json['riskflag']
+    patient_json['riskflag'] = patient_info['riskflag']
 
-    patient['diagnosis'] = symptom_diagnosis(patient_json['gender'], patient_json['age'], patient)
+    patient['diagnosis'] = symptom_diagnosis(patient_info['gender'], patient_json['age'], patient)
 
     collection = create_db_conn('symptoms')
     patient_json['symptom'] = collection.find_one({'patient_username': patient})
@@ -94,12 +94,13 @@ def patient_info():
 
 @app.route("/prescription", methods = ['GET', 'POST'])
 def prescription_info():
-    prescription_json = []
+    prescription_json = {}
     collection = create_db_conn('prescription')
     prescriptions = collection.find({'patientusername':request.values.get('user')},{'_id':False})
     for prescription in prescriptions:
-        prescription_json.append(prescription)
-    return jsonify({'prescriptions':prescription_json})
+        medicine = prescription['medicine']
+        prescription_json[medicine] = prescription
+    return (jsonify({'prescriptions':prescription_json}))
 
 @app.route("/add_appointment", methods = ['GET', 'POST'])
 def appointment():
@@ -111,6 +112,7 @@ def test():
     print(request.args.get('item1')+' '+request.args.get('item2'))
 
 def symptom_diagnosis(gender, age, patientname):
+    config.setup_examples()
     api = infermedica_api.get_api()
     request = infermedica_api.Diagnosis(sex=gender, age=age)
 

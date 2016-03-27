@@ -36,8 +36,10 @@ def patient_login():
         print('Login Successful!')
         json = collection.find_one({'role':'patient','username':username, 'password':password})
         json['symptoms'] = symptoms_data()
-    dbconn.close()
-    return jsonify(json)
+        dbconn.close()
+        return jsonify(json)
+    else:
+        return False
 
 def symptoms_data():
     if request.method == 'POST':
@@ -65,9 +67,7 @@ def doctor_login():
         print(patient_json_list)
         return jsonify({'patient_list':patient_json_list})
     else:
-        return None
-
-
+        return False
 
 @app.route("/patient_info", methods = ['GET', 'POST'])
 def patient_info():

@@ -100,6 +100,11 @@ def prescription_info():
     prescription_json['lastdosedatetime'] = collection['lastdosedatetime']
     return jsonify(prescription_json)
 
+@app.route("/add_appointment", methods = ['GET', 'POST'])
+def appointment():
+    collection = create_db_conn('patient')
+    collection.update_one({'username':request.values.get('user')}, {"$set": {"nextappointment": request.values.get('appointmentdate')}})
+
 @app.route('/test', methods = ['GET', 'POST'])
 def test():
     print(request.args.get('item1')+' '+request.args.get('item2'))

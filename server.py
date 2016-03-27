@@ -83,7 +83,7 @@ def patient_info():
 
     collection = create_db_conn('symptoms')
     patient_json['symptom'] = collection.find_one({'patient_username': patient})
-    return(json.dumps(patient_json))
+    return(jsonify(patient_json))
 
 
 @app.route("/prescription", methods = ['GET', 'POST'])
@@ -112,4 +112,4 @@ def create_db_conn(coll_name):
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(debug=True, host='localhost', port=port)
+    app.run(debug=True, host='0.0.0.0', port=port)

@@ -21,29 +21,50 @@ def create_user():
         dbconn.close()
     # return render_template("create_user.html")
 
-@app.route("/login", methods = ['GET', 'POST'])
-def login():
+@app.route("/patient_login", methods = ['GET', 'POST'])
+def patient_login():
     json = None
     if request.method == 'POST':
         username = request.values.get('user')
         password = request.values.get('pass')
 
-        collection = create_db_conn('patients')
-        if collection.find_one({'email':username, 'password':password}):
+        collection = create_db_conn('person')
+        if collection.find_one({'role':'patient','email':username, 'password':password}):
             print('Login Successful!')
-            json = collection.find_one({'email':username, 'password':password})
+            json = collection.find_one({'role':'patient','email':username, 'password':password})
         else:
             # login failure flag
             print('Login Invalid!')
+        json['symptoms'] = symptoms_data()
         dbconn.close()
         return json
 
-@app.route("/patient_symptoms", methods = ['GET', 'POST'])
 def symptoms_data():
     if request.method == 'POST':
         collection = create_db_conn('symptoms')
         symptoms_list = collection.find_one()
         return symptoms_list
+
+@app.route("/doctor_login", methods = ['GET', 'POST'])
+def login():
+    patient_json_list = None
+    patient_json = None
+    if request.method == 'POST':
+        username = request.values.get('user')
+        password = request.values.get('pass')
+
+        collection = create_db_conn('person')
+        if collection.find_one({'role':'doctor', 'email':username, 'password':password}):
+            patients = collection.find_one({'role':'patient', 'doctor':username})
+            for patient in patients:
+                patient_json['name']= patient['lname']+' '+patient['lname']
+                patient_json['stage'] = patient['json']
+                patient_json['flag'] = patient['flag']
+        else:
+            # login failure flag
+            print('Login Invalid!')
+        dbconn.close()
+        return json
 
 def create_db_conn(coll_name):
     global dbconn

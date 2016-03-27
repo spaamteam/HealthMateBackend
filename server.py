@@ -91,14 +91,12 @@ def patient_info():
 
 @app.route("/prescription", methods = ['GET', 'POST'])
 def prescription_info():
-    prescription_json = {}
+    prescription_json = []
     collection = create_db_conn('prescription')
-    prescription_json['patientusername'] = collection['patient']
-    prescription_json['illness'] = collection['illness']
-    prescription_json['medicine'] = collection['medicine']
-    prescription_json['dosage'] = collection['dosagefrequency']
-    prescription_json['lastdosedatetime'] = collection['lastdosedatetime']
-    return jsonify(prescription_json)
+    prescriptions = collection.find({'role':'patient', 'patient':request.values.get('user')},{'_id':False})
+    for prescription in prescriptions:
+        prescription_json.append(prescription)
+    return jsonify({'prescriptions':prescription_json})
 
 @app.route("/add_appointment", methods = ['GET', 'POST'])
 def appointment():
